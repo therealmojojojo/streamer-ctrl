@@ -1,5 +1,5 @@
 # streamer-ctrl
-Controller for helping with listening music. 
+Controller for helping with listening music. Almost fully generated with ChatGPT v4
 ## Usecases:  
 
 1. all devices off, start streaming music via Node => AVR starts, sets itself on the right input and starts playing music from the start

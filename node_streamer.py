@@ -3,12 +3,15 @@
 import requests
 import xml.etree.ElementTree as ET
 import time
+import logging
+
+logger = logging.getLogger('streamer_ctrl_logger')
 
 class NodeStreamer:
     def __init__(self, ip_address):
         self.base_url = f'http://{ip_address}:11000'
         self.ip_address = ip_address
-        self.last_play_time = time.time()
+        self.last_play_time = 0
     
     def _send_request(self, endpoint):
         """ Send a GET request to the specified endpoint and parse the XML response. """
@@ -18,10 +21,10 @@ class NodeStreamer:
             # Parse the XML response
             return ET.fromstring(response.content)
         except requests.RequestException as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return None
         except ET.ParseError as e:
-            print(f"XML Parse Error: {e}")
+            logger.error(f"XML Parse Error: {e}")
             return None
 
     def get_status(self):
@@ -34,20 +37,20 @@ class NodeStreamer:
 
     def play(self):
         """ Start playback. """
+        self.last_play_time = 0
         return self._send_request('Play')
 
     def pause(self):
         """ Pause playback. """
-        self.set_last_play_time(self)
         return self._send_request('Pause')
 
     def stop(self):
         """ Stop playback. """
-        self.set_last_play_time(self)
         return self._send_request('Stop')
 
     def resume(self):
         """ Resume playback. """
+        self.last_play_time = 0
         return self._send_request('Play')
 
 
@@ -61,12 +64,13 @@ class NodeStreamer:
 
     def back(self):
         """ Restart the current track. """
-        
-        return self._send_request('Play?seek=0')
+        self.last_play_time = 0
+        self._send_request('Play?seek=0')
+        self._send_request('Play') #needs an explicit Play command after seek
     
     def set_last_play_time(self):  
         self.last_play_time = time.time()
-        print(f"NodeStreamer was stopped at {self.last_play_time}.")
+        logger.info(f"Shutdown counter has started at {self.last_play_time}.")
 
     def print_status(self):
-        print(f"NodeStreamer at {self.ip_address} is currently {self.get_status()}.")
+        logger.info(f"NodeStreamer at {self.ip_address} is currently {self.get_status()}.")

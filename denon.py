@@ -1,11 +1,15 @@
 # denon.py
 
 import denonavr
+import logging
+
+logger = logging.getLogger('streamer_ctrl_logger')
 
 class Denon:
     def __init__(self, ip_address):
         self.avr = denonavr.DenonAVR(ip_address)
         self.ip_address = ip_address
+        self.was_started = False
 
     def power_on(self):
         self.update_status()
@@ -52,5 +56,5 @@ class Denon:
         return self.avr.set_volume(volume_level)
     
     def print_status(self):
-        print(f"Denon AVR at {self.ip_address} is currently {'ON' if self.get_power_status() == 'ON' else 'OFF'}, "
+        logger.info(f"Denon AVR at {self.ip_address} is currently {'ON' if self.get_power_status() == 'ON' else 'OFF'}, "
               f"on input {self.get_current_input()}.")
